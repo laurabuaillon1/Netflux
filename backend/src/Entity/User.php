@@ -2,13 +2,78 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model\Operation as ModelOperation;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints\PasswordStrength;
 
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/users/me',
+            name: 'user_profil',
+            openapi: new ModelOperation(
+                summary: "Profil de l'utilisateur connecté",
+                description: "Api qui permet de voir le profil de l'utilisateur connecté"
+            )
+        ),
+        new GetCollection(
+            uriTemplate: '/users/{id}/favorites',
+            name: 'user_favorite_list',
+            openapi: new ModelOperation(
+                summary: 'Liste des favoris',
+                description: "Api qui permet de lister les films mis en favoris par l'utilisateur"
+            ),
+            normalizationContext: ['groups' => ['movie:list']],
+        ),
+        new Post(
+            uriTemplate: '/users/{id}/favorites',
+            name: 'user_favorite_list_update',
+            openapi: new ModelOperation(
+                summary: "Ajout/retrait d'un film en favoris",
+                description: "Api qui permet d'ajouter/d'enlever un film mis en favoris"
+            ),
+        ),
+        new Post(
+            uriTemplate: '/users',
+            name: 'user_new',
+            openapi: new ModelOperation(
+                summary: "Ajout d'un utilisateur",
+                description: "Api qui permet d'ajouter un utilisateur"
+            ),
+        ),
+        new Patch(
+            uriTemplate: '/users/{id}',
+            name: 'user_updated',
+            openapi: new ModelOperation(
+                summary: "Modifier certains champs d'un utilisateur",
+                description: "Api qui permet de modifier certains champs d'un utilisateur"
+            ),
+        ),
+        new Delete(
+            uriTemplate: '/users/{id}',
+            name: 'user_delete',
+            openapi: new ModelOperation(
+                summary: "Supprimer un utilisateur",
+                description: "Api qui permet de supprimer un utilisateur"
+            ),
+        ),
+    ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']]
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -16,24 +81,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank(message: "L\'email' est obligatoire.")]
+    #[Assert\NotNull(message: "L\'email' est obligatoire.")]
+    #[Assert\Email(
+        message: 'l\email: "{{ value }} " n\'est pas valide'
+    )]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
+    #[Groups(['user:read'])]
+    #[Assert\Choice(
+        choices: ['ROLE_USER', 'ROLE_ADMIN'],
+        multiple: true,
+        message: 'Rôle invalide.'
+    )]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
+    #[Assert\PasswordStrength(
+        minScore: PasswordStrength::STRENGTH_WEAK,
+    )]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: 'Votre pseudo doit être minimum de {{ limit }} characters',
+        maxMessage: 'Votre pseudo doit être maximum de {{ limit }} characters',
+    )]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $pseudo = null;
 
     /**
@@ -50,9 +140,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Movie>
      */
-   
 
-    
+
+
 
     public function getId(): ?int
     {
@@ -124,7 +214,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
 
         return $data;
     }
@@ -164,6 +254,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
-    
 }

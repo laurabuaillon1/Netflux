@@ -8,10 +8,14 @@ use App\Entity\User;
 use App\Enum\MovieType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Faker\Factory;
 
 class AppFixtures extends Fixture
 {
+    public function __construct(private UserPasswordHasherInterface $passwordHasher)
+    {
+    }
 
     public function load(ObjectManager $manager): void
     {
@@ -27,8 +31,7 @@ class AppFixtures extends Fixture
             $genre = new Genre();
             $genre->setName($name);
             $manager->persist($genre);
-            $genresdb = $genre;
-
+            $genresdb[]=$genre;
         }
 
         // ==========================================
@@ -38,7 +41,7 @@ class AppFixtures extends Fixture
             $user = new User();
             $user->setPseudo($faker->userName());
             $user->setEmail($faker->unique()->email());
-            $user->setPassword('password123');
+            $user->setPassword($this->passwordHasher->hashPassword($user, 'user123'));
             $user->setRoles(['ROLE_USER']);
             $manager->persist($user);
         }
@@ -64,6 +67,7 @@ class AppFixtures extends Fixture
 
             if(!empty($movieTypes)){
                 $movie->setType($faker->randomElement($movieTypes));
+                $movie->addBelong($faker->randomElement($genresdb));
             }
         }
         $manager->flush();
