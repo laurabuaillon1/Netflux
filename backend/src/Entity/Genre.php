@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
@@ -17,7 +18,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
-    description:"Gestion des genres des films de Netflux",
+    description: "Gestion des genres des films de Netflux",
     operations: [
         new GetCollection(
             openapi: new ModelOperation(
@@ -25,11 +26,25 @@ use Symfony\Component\Validator\Constraints as Assert;
                 description: "Api qui permet d'afficher le liste des genres",
             )
         ),
-        // new GetCollection(),
-        // new Post(),
+        new Post(
+            openapi: new ModelOperation(
+                summary: "Ajouter un genre",
+                description: "Api qui permet d'ajouter un genre",
+            )
+        ),
+        new Patch(
+            openapi: new ModelOperation(
+                summary: "Modifier un genre",
+                description: "Api qui permet de modifier un genre",
+            )
+        ),
+        new Delete(
+            openapi: new ModelOperation(
+                summary: "Supprimer  un genre",
+                description: "Api qui permet de supprimer un genre",
+            )
+        ),
         // new Put(),
-        // new Patch(),
-        // new Delete(),
     ],
     normalizationContext: ['groups' => 'genre:read'],
 )]
@@ -56,7 +71,7 @@ class Genre
      */
 
 
-    #[ORM\ManyToMany(targetEntity: Movie::class, mappedBy: 'Belong')]
+    #[ORM\ManyToMany(targetEntity: Movie::class, mappedBy: 'belong')]
     private Collection $movies;
 
     public function __construct()

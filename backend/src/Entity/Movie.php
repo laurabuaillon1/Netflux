@@ -143,7 +143,7 @@ class Movie
     // #[Assert\Video()]
     private ?string $videoUrl = null;
 
-    #[ORM\Column]
+    #[ORM\Column(updatable: false)]
     #[Groups(['movie:read'])]
     private ?\DateTime $created_at = null;
 
@@ -346,6 +346,7 @@ class Movie
         return $this;
     }
 
+    //Exécuté uniquement au POST (création)
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -353,6 +354,7 @@ class Movie
         $this->updated_at = new \DateTime();
     }
 
+    //Exécuté uniquement au PUT/PATCH (modification)
     #[ORM\PreUpdate]
     public function setUpdatedAtValue(): void
     {
