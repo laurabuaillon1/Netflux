@@ -13,6 +13,7 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,6 +21,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\PasswordStrength;
 
 #[ApiResource(
+    security: "is_granted('ROLE_ADMIN')",
     operations: [
         new Get(
             uriTemplate: '/users/me',
@@ -46,14 +48,14 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 description: "Api qui permet d'ajouter/d'enlever un film mis en favoris"
             ),
         ),
-        new Post(
-            uriTemplate: '/users',
-            name: 'user_new',
-            openapi: new ModelOperation(
-                summary: "Ajout d'un utilisateur",
-                description: "Api qui permet d'ajouter un utilisateur"
-            ),
-        ),
+        // new Post(
+        //     uriTemplate: '/users',
+        //     name: 'user_new',
+        //     openapi: new ModelOperation(
+        //         summary: "Ajout d'un utilisateur",
+        //         description: "Api qui permet d'ajouter un utilisateur"
+        //     ),
+        // ),
         new Patch(
             uriTemplate: '/users/{id}',
             name: 'user_updated',
@@ -76,6 +78,7 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -87,7 +90,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     #[Groups(['user:read', 'user:write'])]
     #[Assert\NotBlank(message: "L\'email' est obligatoire.")]
-    #[Assert\NotNull(message: "L\'email' est obligatoire.")]
     #[Assert\Email(
         message: 'l\email: "{{ value }} " n\'est pas valide'
     )]
@@ -109,10 +111,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:write'])]
     #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
-    #[Assert\PasswordStrength(
-        minScore: PasswordStrength::STRENGTH_WEAK,
+    #[Assert\Length(
+        min: 8,
+        minMessage: "Le mot de passe doit contenir au moins {{ limit }} caractères."
+    )]
+    #[Assert\Regex(
+        pattern: '/^(?=.*[A-Za-z])(?=.*\d).+$/',
+        message: "Le mot de passe doit contenir au moins une lettre et un chiffre."
     )]
     private ?string $password = null;
 
