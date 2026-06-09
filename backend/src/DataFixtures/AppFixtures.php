@@ -46,7 +46,16 @@ class AppFixtures extends Fixture
             $manager->persist($user);
         }
 
+        // ==========================================
+        // CRÉATION DUN ADMIN
+        // ==========================================
 
+            $admin = new User();
+            $admin->setPseudo('admin');
+            $admin->setEmail('admin@netflux.fr');
+            $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin123'));
+            $admin->setRoles(['ROLE_ADMIN']);
+            $manager->persist($admin);
         // ==========================================
         // CRÉATION DES FILMS ET SÉRIES (Une vingtaine)
         // ==========================================

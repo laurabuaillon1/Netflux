@@ -24,25 +24,30 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapi: new ModelOperation(
                 summary: "Liste des genres",
                 description: "Api qui permet d'afficher le liste des genres",
-            )
+            ),
+            security:"is_granted('ROLE_USER')"
+            
         ),
         new Post(
             openapi: new ModelOperation(
                 summary: "Ajouter un genre",
                 description: "Api qui permet d'ajouter un genre",
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
         new Patch(
             openapi: new ModelOperation(
                 summary: "Modifier un genre",
                 description: "Api qui permet de modifier un genre",
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
         new Delete(
             openapi: new ModelOperation(
                 summary: "Supprimer  un genre",
                 description: "Api qui permet de supprimer un genre",
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
         // new Put(),
     ],

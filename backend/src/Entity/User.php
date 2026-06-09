@@ -10,9 +10,13 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model\Operation as ModelOperation;
 use App\Repository\UserRepository;
+use App\State\FavoriteListProvider;
+use App\State\FavoriteProcessor;
+use App\State\UserProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -27,7 +31,9 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
             openapi: new ModelOperation(
                 summary: "Profil de l'utilisateur connecté",
                 description: "Api qui permet de voir le profil de l'utilisateur connecté"
-            )
+            ),
+            security: "is_granted('ROLE_USER')",
+            provider: UserProvider::class,
         ),
         new GetCollection(
             uriTemplate: '/users/{id}/favorites',
@@ -37,6 +43,8 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 description: "Api qui permet de lister les films mis en favoris par l'utilisateur"
             ),
             normalizationContext: ['groups' => ['movie:list']],
+            security: "is_granted('ROLE_USER')",
+            provider: FavoriteListProvider::class,
         ),
         new Post(
             uriTemplate: '/users/{id}/favorites',
@@ -45,15 +53,18 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 summary: "Ajout/retrait d'un film en favoris",
                 description: "Api qui permet d'ajouter/d'enlever un film mis en favoris"
             ),
+            security: "is_granted('ROLE_USER')",
+            processor: FavoriteProcessor::class,
+            denormalizationContext: ['groups' => ['favorite:write']],
         ),
-        new Post(
-            uriTemplate: '/users',
-            name: 'user_new',
-            openapi: new ModelOperation(
-                summary: "Ajout d'un utilisateur",
-                description: "Api qui permet d'ajouter un utilisateur"
-            ),
-        ),
+        // new Post(
+        //     uriTemplate: '/users',
+        //     name: 'user_new',
+        //     openapi: new ModelOperation(
+        //         summary: "Ajout d'un utilisateur",
+        //         description: "Api qui permet d'ajouter un utilisateur"
+        //     ),
+        // ),
         new Patch(
             uriTemplate: '/users/{id}',
             name: 'user_updated',
@@ -61,6 +72,7 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 summary: "Modifier certains champs d'un utilisateur",
                 description: "Api qui permet de modifier certains champs d'un utilisateur"
             ),
+            security: "is_granted('ROLE_USER') and object == user or is_granted('ROLE_ADMIN')"
         ),
         new Delete(
             uriTemplate: '/users/{id}',
@@ -69,13 +81,16 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 summary: "Supprimer un utilisateur",
                 description: "Api qui permet de supprimer un utilisateur"
             ),
+            security: "is_granted('ROLE_USER') and object == user or is_granted('ROLE_ADMIN')"
         ),
+        
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -87,7 +102,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     #[Groups(['user:read', 'user:write'])]
     #[Assert\NotBlank(message: "L\'email' est obligatoire.")]
-    #[Assert\NotNull(message: "L\'email' est obligatoire.")]
     #[Assert\Email(
         message: 'l\email: "{{ value }} " n\'est pas valide'
     )]
@@ -109,10 +123,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:write'])]
     #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
-    #[Assert\PasswordStrength(
-        minScore: PasswordStrength::STRENGTH_WEAK,
+    #[Assert\Length(
+        min: 8,
+        minMessage: "Le mot de passe doit contenir au moins {{ limit }} caractères."
+    )]
+    #[Assert\Regex(
+        pattern: '/^(?=.*[A-Za-z])(?=.*\d).+$/',
+        message: "Le mot de passe doit contenir au moins une lettre et un chiffre."
     )]
     private ?string $password = null;
 
@@ -130,6 +149,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Movie>
      */
     #[ORM\ManyToMany(targetEntity: Movie::class, inversedBy: 'users')]
+    #[Groups(['user:read', 'user:write','favorite:write'])]
     private Collection $favoris;
 
     public function __construct()

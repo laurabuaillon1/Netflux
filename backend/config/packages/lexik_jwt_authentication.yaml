@@ -1,0 +1,12 @@
+lexik_jwt_authentication:
+    # Chemin vers la clé privée(signature)
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    
+    # Chemin vers la clé publique (vérification)
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+
+    # Passphrase pour déchiffrer la clé privée
+    pass_phrase: '%env(JWT_PASSPHRASE)%'
+
+    # Durée de validité du jeton en secondes (1h ici)
+    token_ttl: 3600

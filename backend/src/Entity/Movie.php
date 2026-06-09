@@ -20,15 +20,24 @@ use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bundle\SecurityBundle\Security;
 
 #[ApiResource(
     description: "Gestion des films de Netflux",
     operations: [
+        new Get(
+            openapi: new ModelOperation(
+                summary: "Fiche détaillé de chaque film",
+                description: "Api qui permet d'afficher la fiche détaillée de chaque film"
+            ),
+            security:"is_granted('ROLE_USER')"
+        ),
         new GetCollection(
             openapi: new ModelOperation(
                 summary: "Liste des films",
                 description: "Api qui permet de lister tout les films",
             ),
+            security:"is_granted('ROLE_USER')",
             normalizationContext: ['groups' => ['movie:list']],
             // Pagination
             paginationEnabled: true,
@@ -37,36 +46,34 @@ use Doctrine\ORM\Mapping as ORM;
             paginationMaximumItemsPerPage: 50,
 
         ),
-        new Get(
-            openapi: new ModelOperation(
-                summary: "Fiche détaillé de chaque film",
-                description: "Api qui permet d'afficher la fiche détaillée de chaque film"
-            )
-        ),
         new Post(
             openapi: new ModelOperation(
                 summary: "Création d'un film",
                 description: "Api qui permet d'ajouter un film"
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
         new Put(
             openapi: new ModelOperation(
                 summary: "Mettre à jour tout les champs du film",
                 description: "Api qui permet de mettre à jours un film"
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
         new Patch(
             openapi: new ModelOperation(
                 summary: "Mettre à jour que certains champs du film",
                 description: "Api qui permet de mettre à jours un film"
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
 
         new Delete(
             openapi: new ModelOperation(
                 summary: "Supprimer un film",
                 description: " Api qui permet de supprimer un film"
-            )
+            ),
+            security:"is_granted('ROLE_ADMIN')"
         ),
     ],
     normalizationContext: ['groups' => ['movie:read']],
