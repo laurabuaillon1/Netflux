@@ -59,7 +59,7 @@ security:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
 
         # accessible uniquement aux administrateurs.
-        - { path: ^/api/users, roles: ROLE_ADMIN }
+        - { path: ^/api/users/me, roles: ROLE_USER }
 
         # accessible lecture publique
         - { path: ^/api/movies, roles: PUBLIC_ACCESS , methods: ['GET']}
