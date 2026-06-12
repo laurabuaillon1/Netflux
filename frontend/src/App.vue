@@ -1,11 +1,22 @@
-<script setup></script>
+<script setup>
+import { RouterView } from 'vue-router';
+import MovieItem from './components/MovieItem.vue';
+import MovieListView from './views/MovieListView.vue';
+import HomeView from './views/HomeView.vue';
+import NavBar from './components/NavBar.vue';
+
+
+</script>
 
 <template>
-  <h1 class="text-3xl font-bold text-red-500">You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="layout-container">
+    <NavBar/>
+  </div>
+
+  <body>
+    <RouterView/>
+  </body>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

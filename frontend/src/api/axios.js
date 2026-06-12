@@ -1,11 +1,14 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://localhost:8000/api",
+  //URL de mon backend
+  baseURL: "http://localhost:8000/api",
 });
 
 // Intercepteur pour ajouter le token JWT
 api.interceptors.request.use((config) => {
+
+  //permet de faire la même chose que dans le backend avec authorize
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;

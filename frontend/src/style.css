@@ -1,1 +1,188 @@
 @import "tailwindcss";
+
+/* Variables de couleur pour un look moderne (Deep Dark & Neon Violet) */
+:root {
+  --bg-color: #0d0e12;       /* Noir bleuté très sombre */
+  --card-bg: #161820;        /* Gris/bleu foncé pour les cartes */
+  --accent-color: #6366f1;   /* Indigo/Violet électrique moderne */
+  --accent-hover: #4f46e5;   /* Indigo plus foncé pour le survol */
+  --text-main: #ffffff;      /* Blanc pur */
+  --text-muted: #9ca3af;     /* Gris clair pour les infos secondaires */
+  --radius: 12px;            /* Arrondis modernes */
+  --transition: all 0.3s ease;
+}
+
+/* Application du fond sombre sur toute la page */
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+/* Conteneur principal */
+.app-container {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Style du Sélecteur (Filtre) --- */
+.filter-container {
+  margin-bottom: 2.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.custom-select {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition);
+  appearance: none; /* Enleve le style natif */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 3rem;
+}
+
+.custom-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* --- Grille de Films (Netflix Style) --- */
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+/* Style de la carte Film */
+.movie-card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Effet de zoom au survol de la carte (effet Netflix) */
+.movie-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Conteneur de l'image pour gérer l'overlay */
+.card-image-wrapper {
+  position: relative;
+  aspect-ratio: 2 / 3; /* Ratio d'affiche de film standard */
+  overflow: hidden;
+}
+
+.movie-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+/* Overlay noir transparent qui apparaît au survol */
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 20%, rgba(0, 0, 0, 0.2));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.movie-card:hover .card-overlay {
+  opacity: 1;
+}
+
+/* Bouton Informations moderne */
+.info-btn {
+  background-color: var(--text-main);
+  color: var(--bg-color);
+  padding: 0.6rem 1.2rem;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  transform: translateY(10px);
+}
+
+.movie-card:hover .info-btn {
+  transform: translateY(0);
+}
+
+.info-btn:hover {
+  background-color: var(--accent-color);
+  color: var(--text-main);
+}
+
+/* --- Détails textuels du film --- */
+.movie-details {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.movie-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Coupe le texte proprement s'il est trop long */
+}
+
+.movie-meta {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+
+.separator {
+  margin: 0 0.4rem;
+}
+
+/* Badges pour les genres */
+.movie-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto; /* Pousse les genres vers le bas */
+}
+
+.genre-badge {
+  background-color: rgba(255, 255, 255, 0.06);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
