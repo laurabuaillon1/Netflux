@@ -1,5 +1,7 @@
 <script setup>
+import FAQ from '@/components/FAQ.vue';
 import MovieItem from '@/components/MovieItem.vue';
+import ReasonsSection from '@/components/ReasonsSection.vue';
 import { useMovies } from '@/composables/useMovies';
 import { useUserStore } from '@/stores/user';
 import { onMounted } from 'vue';
@@ -23,6 +25,9 @@ const scroll = (direction) => {
 onMounted(() => {
     fetchMovies()
 })
+
+
+
 
 </script>
 <template>
@@ -89,6 +94,9 @@ onMounted(() => {
             <button class="nav-btn next" @click="scroll('right')">›</button>
         </div>
     </div>
+    <ReasonsSection/>
+    <FAQ/>
+    
 
 </template>
 
@@ -210,7 +218,7 @@ onMounted(() => {
 /* Carroussel */
 
 .home-view {
-    background-color: #141414;
+    
     /* Fond noir style Netflix */
     color: #fff;
     padding: 40px 20px;
@@ -311,4 +319,6 @@ onMounted(() => {
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
 }
+
+
 </style>

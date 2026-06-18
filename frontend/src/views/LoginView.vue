@@ -2,7 +2,17 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user.js';
+import { useAlert } from '@/composables/useAlert';
 
+const { triggerAlert } = useAlert();
+
+const handlelogin = () => {
+  if (success) {
+    triggerAlert('Connexion réussi !', 'success')
+  } else {
+    triggerAlert('Identifiants invalides', 'danger')
+  }
+}
 
 const email = ref('');
 const password = ref('');
@@ -14,56 +24,59 @@ const stores = useUserStore();
 const router = useRouter();
 
 async function envoyer() {
-    erreur.value = null;
-    success.value = false;
+  erreur.value = null;
+  success.value = false;
 
-    try {
-        await stores.login(email.value, password.value)
-        console.log(stores.token)
-        success.value = true;
-        router.push({ name: 'Home' });
-    } catch (e) {
-        erreur.value = e.response?.data?.message || 'Erreur lors de la création.';
-    }
+  try {
+    await stores.login(email.value, password.value);
+    console.log("Token Récupéré :", stores.token);
+    triggerAlert('Connexion réussie ! Bienvenue sur NetFlux.', 'success');
+    success.value = true;
+    router.push({ name: 'home' });
+  } catch (e) {
+    console.error("Détail de l'erreur interceptée :", e);
+    erreur.value = e.response?.data?.message || 'Erreur lors de la création.';
+    triggerAlert(erreur.value, 'danger');
+  }
 }
 
 
 
 </script>
 <template>
-    <div class="auth-container">
-        <div class="auth-card">
+  <div class="auth-container">
+    <div class="auth-card">
 
-            <div class="auth-header">
-                <h2 class="auth-title">Connexion</h2>
-                <p class="auth-subtitle">Connectez-vous pour accéder à vos films préférés</p>
-            </div>
+      <div class="auth-header">
+        <h2 class="auth-title">Connexion</h2>
+        <p class="auth-subtitle">Connectez-vous pour accéder à vos films préférés</p>
+      </div>
 
-            <form @submit.prevent="envoyer" class="auth-form">
+      <form @submit.prevent="envoyer" class="auth-form">
 
-                <div class="form-group">
-                    <label for="email" class="form-label">Adresse e-mail</label>
-                    <input v-model="email" type="email" id="email" placeholder="nom@exemple.com" class="form-input" required>
-                </div>
-
-                <div class="form-group">
-                    <div class="label-row">
-                        <label for="password" class="form-label">Mot de passe</label>
-                        <a href="#" class="forgot-password">Mot de passe oublié ?</a>
-                    </div>
-                    <input v-model="password" type="password" id="password" placeholder="••••••••" class="form-input" required>
-                </div>
-
-                <button type="submit" class="btn-submit">
-                    Se connecter
-                </button>
-            </form>
-
-            <p class="auth-footer">
-                Nouveau sur Netflux ? <router-link to="/register" class="auth-link">Créer un compte</router-link>
-            </p>
+        <div class="form-group">
+          <label for="email" class="form-label">Adresse e-mail</label>
+          <input v-model="email" type="email" id="email" placeholder="nom@exemple.com" class="form-input" required>
         </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="password" class="form-label">Mot de passe</label>
+            <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+          </div>
+          <input v-model="password" type="password" id="password" placeholder="••••••••" class="form-input" required>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Se connecter
+        </button>
+      </form>
+
+      <p class="auth-footer">
+        Nouveau sur Netflux ? <router-link to="/register" class="auth-link">Créer un compte</router-link>
+      </p>
     </div>
+  </div>
 </template>
 
 <style scoped>
@@ -72,17 +85,20 @@ async function envoyer() {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px); 
+  min-height: calc(100vh - 80px);
   padding: 2rem;
-  background-color: #0d0e12; /* Fond très sombre de l'app */
+  background-color: #0d0e12;
+  /* Fond très sombre de l'app */
 }
 
 /* --- La Carte Formulaire --- */
 .auth-card {
-  background-color: #161820; /* Gris foncé pour détacher la carte du fond */
+  background-color: #161820;
+  /* Gris foncé pour détacher la carte du fond */
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  padding: 3.5rem 3rem; /* Grands espaces internes */
+  padding: 3.5rem 3rem;
+  /* Grands espaces internes */
   width: 100%;
   max-width: 460px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -90,7 +106,8 @@ async function envoyer() {
 
 /* --- En-tête (Espacements) --- */
 .auth-header {
-  margin-bottom: 2.5rem; /* Donne de l'air avant le début du formulaire */
+  margin-bottom: 2.5rem;
+  /* Donne de l'air avant le début du formulaire */
 }
 
 .auth-title {
@@ -118,13 +135,15 @@ async function envoyer() {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 2rem; /* Espace important entre chaque bloc d'input */
+  gap: 2rem;
+  /* Espace important entre chaque bloc d'input */
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem; /* Espace entre le label et l'input */
+  gap: 0.6rem;
+  /* Espace entre le label et l'input */
 }
 
 .label-row {
@@ -134,7 +153,8 @@ async function envoyer() {
 }
 
 .form-label {
-  color: #e5e7eb; /* Blanc cassé pour une lecture parfaite */
+  color: #e5e7eb;
+  /* Blanc cassé pour une lecture parfaite */
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -154,11 +174,14 @@ async function envoyer() {
 /* --- LES INPUTS (Enfin visibles !) --- */
 .form-input {
   width: 100%;
-  background-color: #1f222f; /* Fond nettement plus clair que la carte */
+  background-color: #1f222f;
+  /* Fond nettement plus clair que la carte */
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.1); /* Bordure visible par défaut */
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  /* Bordure visible par défaut */
   border-radius: 10px;
-  padding: 1rem 1.2rem; /* Plus grand pour cliquer facilement */
+  padding: 1rem 1.2rem;
+  /* Plus grand pour cliquer facilement */
   font-size: 1rem;
   outline: none;
   box-sizing: border-box;
@@ -172,9 +195,12 @@ async function envoyer() {
 
 /* Effet de Focus (Quand on clique dedans) */
 .form-input:focus {
-  border-color: #6366f1; /* Devient violet électrique */
-  background-color: #242837; /* S'éclaircit un poil */
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); /* Halo lumineux subtil */
+  border-color: #6366f1;
+  /* Devient violet électrique */
+  background-color: #242837;
+  /* S'éclaircit un poil */
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  /* Halo lumineux subtil */
 }
 
 /* --- Bouton Connexion --- */
@@ -187,7 +213,8 @@ async function envoyer() {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 0.5rem; /* Espace bonus avant le bouton */
+  margin-top: 0.5rem;
+  /* Espace bonus avant le bouton */
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
