@@ -35,7 +35,7 @@ async function envoyer() {
         <div class="auth-card">
 
             <div class="auth-header">
-                <h2 class="auth-title">Ravi de vous <span class="text-gradient">revoir</span></h2>
+                <h2 class="auth-title">Connexion</h2>
                 <p class="auth-subtitle">Connectez-vous pour accéder à vos films préférés</p>
             </div>
 

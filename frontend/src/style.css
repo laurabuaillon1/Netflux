@@ -65,7 +65,7 @@ body {
 /* --- Grille de Films (Netflix Style) --- */
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
 }
 
@@ -147,6 +147,13 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  gap: 16px;
+}
+
+.movie-detail_container{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .movie-title {
@@ -186,3 +193,6 @@ body {
   color: var(--text-muted);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Card sur la page favoris */
+

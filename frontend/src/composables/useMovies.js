@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import api from "@/api/axios";
 
 export function useMovies() {
@@ -6,6 +6,32 @@ export function useMovies() {
   const movie = ref(null);
   const loading = ref(false);
   const error = ref(null);
+
+  // Propriété calculée pour filtrer uniquement les films
+  const onlyMovies = computed(() => {
+    return movies.value.filter((item) => item.type === "Film");
+  });
+
+  // Propriété calculée pour filtrer uniquement les séries
+  const onlySeries = computed(() => {
+    return movies.value.filter((item) => item.type === "Série");
+  });
+
+  // Propriété calculée pour filtrer les films/série les mieux noté
+  const bestRateMovies = computed(() => {
+    console.log("Données brutes reçues pour le filtre de note :", movies.value);
+    return movies.value.filter((item) => item.rating >= 4);
+  });
+
+  // Propriété calculée pour filtrer les films/série les +recent
+  const recentMovies = computed(() => {
+    return movies.value.filter((item) => {
+      const dateMovie= new Date(item.releaseDate);
+      console.log(dateMovie)
+      const year = dateMovie.getFullYear()
+      return year >= 2020; // Garde les films de 2020, 2021, 2022...
+    });
+  });
 
   // tout les posts = lister
   const fetchMovies = async () => {
@@ -24,7 +50,7 @@ export function useMovies() {
 
   // Un seul post par id =detail
   const fetchMovie = async (id) => {
-    console.log('fetchMovie appelé avec id:', id);
+    console.log("fetchMovie appelé avec id:", id);
     if (!id) {
       movie.value = null;
       return;
@@ -41,8 +67,6 @@ export function useMovies() {
       loading.value = false;
     }
   };
-
-  
 
   // Create (POST)
   const createMovie = async (payload) => {
@@ -78,22 +102,6 @@ export function useMovies() {
     }
   };
 
-  //Delete
-  const deleteMovie = async (id) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      await api.delete("/movies/delete/:id");
-      movies.value = movies.value.filter((movie) => movie.id !== id);
-    } catch (error) {
-      error.value =
-        error?.message || "Erreur lors de la suppression du film.";
-      throw error;
-    } finally {
-      loading.value = false;
-    }
-  };
-
   return {
     movies,
     movie,
@@ -103,6 +111,9 @@ export function useMovies() {
     fetchMovie,
     createMovie,
     updateMovie,
-    deleteMovie
+    onlyMovies,
+    onlySeries,
+    bestRateMovies,
+    recentMovies,
   };
 }

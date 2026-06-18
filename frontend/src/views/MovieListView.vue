@@ -2,6 +2,9 @@
 import api from '@/api/axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useMovies } from '@/composables/useMovies';
+import FavoriteButton from '@/components/FavoriteButton.vue';
+import MovieList from '@/components/MovieList.vue';
+import MovieItem from '@/components/MovieItem.vue';
 
 const { movies, loading, error, fetchMovies } = useMovies()
 
@@ -14,8 +17,8 @@ onMounted(async () => {
     // const moviesResponse = await api.get("/movies");
     // movies.value = moviesResponse.data.member;
     // console.log(moviesResponse.data);
-     fetchMovies()
-    
+    fetchMovies()
+
 
     const genresResponse = await api.get("/genres");
     genres.value = genresResponse.data.member;
@@ -27,12 +30,12 @@ onMounted(async () => {
 //////////////FILTRES////////////////////
 
 // Variables réactives pour les filtres
-const selectedCategory=ref('')
+const selectedCategory = ref('')
 
 //watcher pour surveiller les changements de filtres
-watch([selectedCategory],() => {
+watch([selectedCategory], () => {
     console.log(`Filtres appliqués - ${filteredMovies.value.length} produits trouvés`)
-}, {deep : true})
+}, { deep: true })
 
 
 // // Afficher la liste des genres dans le dropdown
@@ -43,8 +46,8 @@ watch([selectedCategory],() => {
 const filteredMovies = computed(() => {
     let filtered = movies.value
 
-    if(selectedGenre.value){
-        filtered = filtered.filter(movie => movie.belong.some(genre=>genre.name === selectedGenre.value))
+    if (selectedGenre.value) {
+        filtered = filtered.filter(movie => movie.belong.some(genre => genre.name === selectedGenre.value))
     }
 
     return filtered
@@ -63,31 +66,10 @@ console.log(filteredMovies)
             </select>
         </div>
 
+        <!-- <MovieList/> -->
         <div class="movies-grid">
-            <div v-for="film in filteredMovies" :key="film.id" class="movie-card">
-                <div class="card-image-wrapper">
-                    <img :src="film.imageUrl" alt="image_film" class="movie-image">
-                    <div class="card-overlay">
-                        <router-link :to="`/movies/${film.id}`" class="info-btn">
-                            Informations
-                        </router-link>
-                    </div>
-                </div>
-
-                <div class="movie-details">
-                    <h3 class="movie-title">{{ film.title }}</h3>
-                    <div class="movie-meta">
-                        <span>{{ film.releaseDate }}</span>
-                        <span class="separator">•</span>
-                        <span>{{ film.duration }} min</span>
-                    </div>
-                    <div class="movie-genres">
-                        <span v-for="genre in film.belong" :key="genre.id" class="genre-badge">
-                            {{ genre.name }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <MovieItem v-for="film in filteredMovies" :key="film.id" class="movie-card" :movie="film">
+            </MovieItem>
         </div>
     </div>
 </template>

@@ -8,9 +8,8 @@ import Button from './Button.vue';
     <div>
         <div class="navbar">
             <div class="nav-left">
-                <h1 class="logo">Net<span class="logo-accent">Flux</span></h1>
+                <router-link to="/" class="logo">Net<span class="logo-accent">Flux</span></router-link>
                 <div class="nav-links">
-                    <router-link to="/" class="nav-item">Home</router-link>
                     <router-link to="/movies" class="nav-item">Films</router-link>
                     <router-link to="/favorites" class="nav-item">Favoris</router-link>
                 </div>

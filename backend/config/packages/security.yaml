@@ -57,6 +57,7 @@ security:
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/users, roles: PUBLIC_ACCESS}
 
         # accessible uniquement aux administrateurs.
         - { path: ^/api/users/me, roles: ROLE_USER }
@@ -66,8 +67,8 @@ security:
         - { path: ^/api/genres, roles: PUBLIC_ACCESS , methods: ['GET']}
 
         # accessible ecriture réservé aux administrateurs
-        - { path: ^/api/movies, roles: PUBLIC_ADMIN , methods: ['POST','PUT','DELETE','PATCH']}
-        - { path: ^/api/genres, roles: PUBLIC_ADMIN , methods: ['POST','PUT','DELETE','PATCH']}
+        - { path: ^/api/movies, roles: ROLE_ADMIN , methods: ['POST','PUT','DELETE','PATCH']}
+        - { path: ^/api/genres, roles: ROLE_ADMIN , methods: ['POST','PUT','DELETE','PATCH']}
 
         # accessible uniquement à l’utilisateur connecté.
         - { path: ^/api/favorites, roles: ROLE_USER }

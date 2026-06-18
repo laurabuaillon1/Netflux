@@ -1,20 +1,21 @@
 <script setup>
-import MovieItem from './MovieItem.vue';
 import { ref } from 'vue';
+import MovieItem from './MovieItem.vue';
 
 
-const movieList= ref(['']);
+const movieList= ref([]);
 
 
 </script>
 <template>
     <div>
         <h1>Liste des films</h1>
-        <p>{{ film.title }}</p>
-        <p>{{ film.release_date }}</p>
-        <p>{{ film.duration }}</p>
-        <p>{{ genre.name }}</p>
-        <router-link :to="`/movies/${film.id}`">Informations</router-link>
+        <MovieItem 
+            v-for="movie in movieList" 
+            :key="movie.id"
+            :movie="movie"
+            :genre="movie.genre"
+        />
     </div>
 </template>
 

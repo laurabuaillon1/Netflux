@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\Operation as ModelOperation;
 use App\Repository\UserRepository;
 use App\State\FavoriteListProvider;
 use App\State\FavoriteProcessor;
+use App\State\UserProcessor;
 use App\State\UserProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -57,14 +58,15 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
             processor: FavoriteProcessor::class,
             denormalizationContext: ['groups' => ['favorite:write']],
         ),
-        // new Post(
-        //     uriTemplate: '/users',
-        //     name: 'user_new',
-        //     openapi: new ModelOperation(
-        //         summary: "Ajout d'un utilisateur",
-        //         description: "Api qui permet d'ajouter un utilisateur"
-        //     ),
-        // ),
+        new Post(
+            uriTemplate: '/users',
+            name: 'user_new',
+            openapi: new ModelOperation(
+                summary: "Ajout d'un utilisateur",
+                description: "Api qui permet d'ajouter un utilisateur"
+                ),
+            processor: UserProcessor::class,
+        ),
         new Patch(
             uriTemplate: '/users/{id}',
             name: 'user_updated',
