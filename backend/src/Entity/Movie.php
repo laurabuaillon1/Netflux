@@ -37,13 +37,13 @@ use Symfony\Bundle\SecurityBundle\Security;
                 summary: "Liste des films",
                 description: "Api qui permet de lister tout les films",
             ),
-            security:"is_granted('ROLE_USER')",
+            // security:"is_granted('ROLE_USER')",
             normalizationContext: ['groups' => ['movie:list']],
             // Pagination
-            paginationEnabled: true,
-            paginationItemsPerPage: 10,
-            paginationClientItemsPerPage: true,
-            paginationMaximumItemsPerPage: 50,
+            // paginationEnabled: true,
+            // paginationItemsPerPage: 10,
+            // paginationClientItemsPerPage: true,
+            // paginationMaximumItemsPerPage: 50,
 
         ),
         new Post(
@@ -92,7 +92,7 @@ class Movie
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['movie:read'])]
+    #[Groups(['movie:read','movie:list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -118,19 +118,19 @@ class Movie
     private ?string $synopsis = null;
 
     #[ORM\Column]
-    #[Groups(['movie:read', 'movie:write'])]
+    #[Groups(['movie:read', 'movie:write', 'movie:list'])]
     #[Assert\NotBlank(message: 'La date de réalisation est obligatoire.')]
     // #[Assert\Date()]
     private ?\DateTime $releaseDate = null;
 
     #[ORM\Column(type: 'integer')]
-    #[Groups(['movie:read', 'movie:write'])]
+    #[Groups(['movie:read', 'movie:write', 'movie:list'])]
     #[Assert\NotBlank(message: 'La durée du film est obligatoire.')]
     #[Assert\Positive()]
     private ?int $duration = null;
 
     #[ORM\Column]
-    #[Groups(['movie:read', 'movie:write'])]
+    #[Groups(['movie:read', 'movie:write', 'movie:list'])]
     #[Assert\Range(min: 0, max: 5)]
     private ?float $rating = null;
 

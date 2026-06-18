@@ -61,7 +61,7 @@ class Genre
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['genre:read', 'movie:list'])]
+    #[Groups(['genre:read', 'movie:list','movie:read'])]
     #[Assert\Length(
         min: 2,
         max: 100,
