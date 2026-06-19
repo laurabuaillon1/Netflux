@@ -1,27 +1,49 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-// import api from '@/api/axios';
-import { useMovies } from '@/composables/useMovies';
+import { onMounted, reactive, ref, watch } from 'vue';
+import { useUsers } from '@/composables/useUsers';
 import { useRouter } from 'vue-router';
 
-const { fetchMovies, deleteMovie, movies, loading, error } = useMovies();
 
+const { fetchUsers, updateUser, users, loading, error } = useUsers();
 const router = useRouter();
-const selectedMovieId = ref(null);
+const selectedUsersId = ref(null);
+
+// Liste des rôles autorisés par l'entité USER
+const availableRoles = ['ROLE_USER', 'ROLE_ADMIN'];
 
 
-onMounted(async () => {
-    await fetchMovies();
+// Initialisation des données du formulaire
+const formData = reactive({
+    email: '',
+    pseudo: null,
+    roles: ['ROLE_USER'],
 });
 
+//Préremplir le formulaire
+watch(selectedUsersId, async (id) => {
+    if (!id) return; 
+
+    const user = users.value.find(u => u.id === Number(id));
+    
+    if (user) {
+        formData.email = user.email;
+        formData.pseudo = user.pseudo;
+        formData.roles = [...user.roles];
+    }
+});
+
+onMounted(async () => {
+    await fetchUsers();
+})
 
 // Gestion de la soumission
 const handleSubmit = async () => {
-    await deleteMovie(selectedMovieId.value);
-    router.push({ name: 'admin' })
-
+    await updateUser(selectedUsersId.value, formData);
+    if (!error.value) {
+        console.log('Utilisateur modifié avec succès!')
+        router.push({ name: 'admin' });
+    }
 };
-
 
 </script>
 <template>
@@ -33,21 +55,50 @@ const handleSubmit = async () => {
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                Retour au panel
+                Retour à la console
             </router-link>
-            <h2>Supprimer un Film/Série</h2>
-            <div class="form-group">
-                <label for="movie">Choisir un film à supprimer</label>
-                <div class="select-wrapper">
-                    <select id="movie" v-model="selectedMovieId" required>
-                        <option value="">-- Sélectionner un film --</option>
-                        <option v-for="movie in movies" :key="movie.id" :value="movie.id">
-                            {{ movie.title }}
-                        </option>
-                    </select>
+
+            <h2>Modifier un Utilisateur</h2>
+
+            <form @submit.prevent="handleSubmit">
+
+                <div class="form-group">
+                    <label for="user-select">Choisir un utilisateur</label>
+                    <div class="select-wrapper">
+                        <select id="user-select" v-model="selectedUsersId" required>
+                            <option value="">-- Sélectionner un utilisateur --</option>
+                            <option v-for="user in users" :key="user.id" :value="user.id">
+                                {{ user.pseudo}}
+                            </option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <button @click="handleSubmit" class="submit-btn danger">Confirmer la suppression</button>
+
+                <div class="form-group">
+                    <label for="pseudo">Pseudo *</label>
+                    <input type="text" id="pseudo" v-model="formData.pseudo" required minlength="2" maxlength="255"
+                        placeholder="Ex: NeoFlix" />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Adresse Email *</label>
+                    <input type="email" id="email" v-model="formData.email" required
+                        placeholder="exemple@netflux.com" />
+                </div>
+
+                <div class="form-group">
+                    <label>Rôles applicables</label>
+                    <label v-for="role in availableRoles" :key="role" class="checkbox-label">
+                        <input type="checkbox" :value="role" v-model="formData.roles" />
+                        {{ role }}
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn" :disabled="loading || !selectedUsersId">
+                    <span v-if="loading">Modification en cours...</span>
+                    <span v-else>Enregistrer les modifications</span>
+                </button>
+            </form>
         </div>
     </div>
 </template>
@@ -84,6 +135,34 @@ const handleSubmit = async () => {
     border-radius: var(--radius);
     border: 1px solid rgba(255, 255, 255, 0.03);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+/* --- STYLE DU BOUTON RETOUR --- */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    transition: var(--transition);
+}
+
+.back-icon {
+    width: 16px;
+    height: 16px;
+    transition: var(--transition);
+}
+
+.back-link:hover {
+    color: var(--accent-color);
+}
+
+.back-link:hover .back-icon {
+    transform: translateX(-4px);
 }
 
 h2 {
@@ -101,15 +180,6 @@ h2 {
     flex-direction: column;
 }
 
-.form-row {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
 label {
     font-size: 0.9rem;
     font-weight: 600;
@@ -119,11 +189,8 @@ label {
 
 /* Style uniforme des inputs */
 input[type="text"],
-input[type="date"],
-input[type="number"],
-input[type="url"],
-select,
-textarea {
+input[type="email"],
+select {
     width: 100%;
     padding: 0.85rem 1rem;
     background-color: rgba(255, 255, 255, 0.03);
@@ -136,34 +203,17 @@ textarea {
 }
 
 input:focus,
-select:focus,
-textarea:focus {
+select:focus {
     outline: none;
     background-color: rgba(255, 255, 255, 0.05);
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
-/* Style appliqué aux options pour éviter le fond blanc natif */
+/* Options du select corrigées */
 select option {
     background-color: var(--card-bg);
     color: var(--text-main);
-    padding: 0.85rem;
-    /* Pris en compte par certains navigateurs */
-}
-
-/* Optionnel : Enlève le style blanc de l'option désactivée ou par défaut */
-select option:disabled {
-    color: var(--text-muted);
-}
-
-/* Adaptation spécifique calendrier Chrome/Safari */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) opacity(0.6);
-}
-
-textarea {
-    resize: vertical;
 }
 
 /* Flèche personnalisée pour le select sur fond sombre */
@@ -187,21 +237,16 @@ select {
     cursor: pointer;
 }
 
-/* --- STYLE REVISITÉ POUR VOS CHECKBOXES ACTUELLES --- */
-
-/* Alignement et grille pour l'affichage des genres */
+/* --- STYLE DES CHECKBOXES --- */
 .form-group:has(.checkbox-label) {
     display: flex;
     flex-direction: column;
 }
 
-/* Conteneur implicite : On applique la grille sur le parent direct des labels */
 .form-group>label~.checkbox-label {
     margin-bottom: 0.5rem;
 }
 
-/* Pour faire une jolie grille comme avant sans toucher au HTML, 
-   on cible les labels de type checkbox */
 .checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -214,10 +259,8 @@ select {
     transition: var(--transition);
 }
 
-/* Style de l'input checkbox redesigné nativement */
 .checkbox-label input[type="checkbox"] {
     appearance: none;
-    /* Supprime le style moche par défaut du navigateur */
     -webkit-appearance: none;
     width: 18px;
     height: 18px;
@@ -228,24 +271,20 @@ select {
     cursor: pointer;
     display: inline-grid;
     place-content: center;
-    /* Centre la future coche */
     transition: var(--transition);
     position: relative;
 }
 
-/* Effet au survol de la case */
 .checkbox-label:hover input[type="checkbox"] {
     border-color: var(--accent-color);
 }
 
-/* Style quand la case est cochée */
 .checkbox-label input[type="checkbox"]:checked {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
     box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
 }
 
-/* Dessin de la coche blanche en CSS pur dans l'input coché */
 .checkbox-label input[type="checkbox"]:checked::before {
     content: "";
     width: 5px;
@@ -254,49 +293,17 @@ select {
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
     margin-top: -2px;
-    /* Ajustement précis du centrage */
 }
 
-/* Changement de couleur du texte du label quand coché */
 .checkbox-label:has(input:checked) {
     color: var(--text-main);
 }
-
-.back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    transition: var(--transition);
-}
-
-.back-icon {
-    width: 16px;
-    height: 16px;
-    transition: var(--transition);
-}
-
-/* Animation au survol : le texte s'allume et la flèche glisse vers la gauche */
-.back-link:hover {
-    color: var(--accent-color);
-}
-
-.back-link:hover .back-icon {
-    transform: translateX(-4px);
-}
-
-
-/* ---------------------------------------------------- */
 
 /* Bouton Néon Violet */
 .submit-btn {
     width: 100%;
     padding: 1rem;
-    background-color: rgb(241, 99, 99);
+    background-color: var(--accent-color);
     color: var(--text-main);
     border: none;
     border-radius: 8px;
@@ -305,16 +312,18 @@ select {
     cursor: pointer;
     margin-top: 1.5rem;
     transition: var(--transition);
-    box-shadow: 0 4px 15px rgba(241, 99, 99, 0.2);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
 }
 
-.submit-btn:hover {
-    background-color: rgb(241, 99, 99);
-    box-shadow: 0 6px 20px rgba(241, 99, 99, 0.4);
+.submit-btn:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
     transform: translateY(-2px);
 }
 
-.submit-btn:active {
-    transform: translateY(0);
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 </style>

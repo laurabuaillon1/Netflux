@@ -50,6 +50,77 @@ export function useUsers() {
     }
   };
 
+  // Lister tous les utilisateurs
+const fetchUsers = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const res = await api.get("/users");
+    users.value = res.data.member;
+  } catch (err) {
+    error.value = err?.message || "Erreur lors de la récupération des utilisateurs.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Création d'un utilisateur
+const createUser = async (payload) => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const res = await api.post("/users", payload);
+    users.value.unshift(res.data);
+    return res.data;
+  } catch (err) {
+    error.value = err?.message || "Erreur lors de la création de l'utilisateur.";
+    throw err;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Modifier un utilisateur
+const updateUser = async (id, payload) => {
+  console.log(payload);
+  loading.value = true;
+  error.value = null;
+  try {
+    const res = await api.patch(`/users/${id}`, payload, {
+      headers: {
+        'Content-Type': 'application/merge-patch+json'
+      }
+    });
+    // Mise à jour de la liste locale en mémoire
+    const idx = users.value.findIndex(u => u.id === res.data.id);
+    if (idx !== -1) {
+      users.value[idx] = res.data;
+    }
+    return res.data;
+  } catch (err) {
+    // Récupération du message d'erreur d'API Platform si disponible
+    error.value = err.response?.data?.['hydra:description'] || err?.message || "Erreur lors de la mise à jour de l'utilisateur.";
+    throw err;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Supprimer un utilisateur
+const deleteUser = async (id) => {
+  loading.value = true;
+  error.value = null;
+  try {
+    await api.delete(`/users/${id}`);
+    users.value = users.value.filter(u => u.id !== parseInt(id));
+  } catch (err) {
+    error.value = err?.message || "Erreur lors de la suppression de l'utilisateur.";
+    throw err;
+  } finally {
+    loading.value = false;
+  }
+};
+
   return {
     users,
     user,
@@ -58,5 +129,9 @@ export function useUsers() {
     getFavorites,
     getMe,
     toggleFavorite,
+    fetchUsers,
+    updateUser,
+    deleteUser,
+    createUser,
   };
 }

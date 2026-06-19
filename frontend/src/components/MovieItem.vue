@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
-console.log('MovieItem chargé');
+// console.log('MovieItem chargé');
 import FavoriteButton from './FavoriteButton.vue';
 import { useUsers } from '@/composables/useUsers.js';
 

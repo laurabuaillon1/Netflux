@@ -4,7 +4,6 @@ import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 
-
 const { movie, loading, error, fetchMovie } = useMovies()
 const route = useRoute();
 const id = route.params.id;

@@ -107,7 +107,7 @@ class Movie
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['movie:read', 'movie:write'])]
+    #[Groups(['movie:read', 'movie:write','movie:list'])]
     #[Assert\NotBlank(message: 'Le synopsis est obligatoire.')]
     #[Assert\Length(
         min: 2,
@@ -145,7 +145,7 @@ class Movie
     private ?string $imageUrl = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['movie:read', 'movie:write'])]
+    #[Groups(['movie:read', 'movie:write','movie:list'])]
     #[Assert\NotBlank(message: 'La video du film est obligatoire.')]
     // #[Assert\Video()]
     private ?string $videoUrl = null;

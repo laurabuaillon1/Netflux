@@ -1,7 +1,7 @@
 <script setup>
 import Button from './Button.vue';
-
-
+import { useUserStore } from '@/stores/user.js';
+const store = useUserStore();
 
 </script>
 <template>
@@ -12,6 +12,7 @@ import Button from './Button.vue';
                 <div class="nav-links">
                     <router-link to="/movies" class="nav-item">Films</router-link>
                     <router-link to="/favorites" class="nav-item">Favoris</router-link>
+                    <router-link v-if="store.user?.roles?.includes('ROLE_ADMIN')"  to="/admin" class="nav-item"> Panel</router-link>
                 </div>
             </div>
 
