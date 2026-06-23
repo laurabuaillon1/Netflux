@@ -1,59 +1,49 @@
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue';
-import api from '@/api/axios';
-import { useMovies } from '@/composables/useMovies';
+import { onMounted, reactive, ref, watch } from 'vue';
+import { useUsers } from '@/composables/useUsers';
 import { useRouter } from 'vue-router';
 
-const { fetchMovies, updateMovie, movies, loading, error } = useMovies();
 
+const { fetchUsers, updateUser, users, loading, error } = useUsers();
 const router = useRouter();
-const genres = ref([]);
-const selectedMovieId = ref(null);
+const selectedUsersId = ref(null);
 
+// Liste des rôles autorisés par l'entité USER
+const availableRoles = ['ROLE_USER', 'ROLE_ADMIN'];
 
-//utilisation du composables
-onMounted(async () => {
-    await fetchMovies();
-    const res = await api.get("/genres");
-    genres.value = res.data.member;
-});
-
-// Quand on choisit un film, on pré-remplit le formulaire
-watch(selectedMovieId, (id) => {
-    const movie = movies.value.find(m => m.id === parseInt(id));
-    if (movie) {
-        formData.title = movie.title;
-        formData.synopsis = movie.synopsis;
-        formData.releaseDate = movie.releaseDate?.split('T')[0];
-        formData.duration = movie.duration;
-        formData.rating = movie.rating;
-        formData.type = movie.type;
-        formData.imageUrl = movie.imageUrl;
-        formData.videoUrl = movie.videoUrl;
-        formData.belong = movie.belong.map(g => g['@id'] ?? g);
-    }
-});
 
 // Initialisation des données du formulaire
 const formData = reactive({
-    title: '',
-    synopsis: '',
-    releaseDate: '',
-    duration: null,
-    rating: 0,
-    type: 'Film', // Valeur par défaut de l'enum MovieType
-    imageUrl: '',
-    videoUrl: '',
-    belong: [] // Tableau pour stocker les genres sélectionnés (ManyToMany)
+    email: '',
+    pseudo: null,
+    roles: ['ROLE_USER'],
 });
+
+//Préremplir le formulaire
+watch(selectedUsersId, async (id) => {
+    if (!id) return; 
+
+    const user = users.value.find(u => u.id === Number(id));
+    
+    if (user) {
+        formData.email = user.email;
+        formData.pseudo = user.pseudo;
+        formData.roles = [...user.roles];
+    }
+});
+
+onMounted(async () => {
+    await fetchUsers();
+})
 
 // Gestion de la soumission
 const handleSubmit = async () => {
-    await updateMovie(selectedMovieId.value, formData);
-    router.push({ name: 'admin' })
-
+    await updateUser(selectedUsersId.value, formData);
+    if (!error.value) {
+        console.log('Utilisateur modifié avec succès!')
+        router.push({ name: 'admin' });
+    }
 };
-
 
 </script>
 <template>
@@ -65,84 +55,49 @@ const handleSubmit = async () => {
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                Retour au panel
+                Retour à la console
             </router-link>
 
-            <h2>Modifier un Film/Série</h2>
+            <h2>Modifier un Utilisateur</h2>
 
             <form @submit.prevent="handleSubmit">
 
                 <div class="form-group">
-                    <label for="movie">Choisir un film</label>
+                    <label for="user-select">Choisir un utilisateur</label>
                     <div class="select-wrapper">
-                        <select id="movie" v-model="selectedMovieId" required>
-                            <option value="">-- Sélectionner un film --</option>
-                            <option v-for="movie in movies" :key="movie.id" :value="movie.id">
-                                {{ movie.title }}
+                        <select id="user-select" v-model="selectedUsersId" required>
+                            <option value="">-- Sélectionner un utilisateur --</option>
+                            <option v-for="user in users" :key="user.id" :value="user.id">
+                                {{ user.pseudo}}
                             </option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="title">Titre *</label>
-                    <input type="text" id="title" v-model="formData.title" required placeholder="Ex: Inception" />
+                    <label for="pseudo">Pseudo *</label>
+                    <input type="text" id="pseudo" v-model="formData.pseudo" required minlength="2" maxlength="255"
+                        placeholder="Ex: NeoFlix" />
                 </div>
 
                 <div class="form-group">
-                    <label for="type">Type *</label>
-                    <div class="select-wrapper">
-                        <select id="type" v-model="formData.type" required>
-                            <option value="Film">Film</option>
-                            <option value="Série">Série</option>
-                        </select>
-                    </div>
+                    <label for="email">Adresse Email *</label>
+                    <input type="email" id="email" v-model="formData.email" required
+                        placeholder="exemple@netflux.com" />
                 </div>
 
                 <div class="form-group">
-                    <label for="synopsis">Synopsis</label>
-                    <textarea id="synopsis" v-model="formData.synopsis" rows="4"
-                        placeholder="Résumé de l'œuvre..."></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="releaseDate">Date de sortie</label>
-                        <input type="date" id="releaseDate" v-model="formData.releaseDate" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="duration">Durée (en minutes)</label>
-                        <input type="number" id="duration" v-model.number="formData.duration" min="0" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="rating">Note (0 à 5)</label>
-                    <input type="number" id="rating" v-model.number="formData.rating" min="0" max="5" stroke-width="2"
-                        step="0.1" />
-                </div>
-
-                <div class="form-group">
-                    <label for="imageUrl">URL de l'image</label>
-                    <input type="url" id="imageUrl" v-model="formData.imageUrl"
-                        placeholder="https://link-to-image.com/poster.jpg" />
-                </div>
-
-                <div class="form-group">
-                    <label for="videoUrl">URL de la vidéo (Bande-annonce)</label>
-                    <input type="url" id="videoUrl" v-model="formData.videoUrl" placeholder="https://youtube.com/..." />
-                </div>
-
-                <div class="form-group">
-                    <label>Genres</label>
-                    <label v-for="genre in genres" :key="genre.id" class="checkbox-label">
-                        <input type="checkbox" :value="genre['@id']" v-model="formData.belong" />
-                        {{ genre.name }}
+                    <label>Rôles applicables</label>
+                    <label v-for="role in availableRoles" :key="role" class="checkbox-label">
+                        <input type="checkbox" :value="role" v-model="formData.roles" />
+                        {{ role }}
                     </label>
                 </div>
 
-                <button type="submit" class="submit-btn">Enregistrer</button>
+                <button type="submit" class="submit-btn" :disabled="loading || !selectedUsersId">
+                    <span v-if="loading">Modification en cours...</span>
+                    <span v-else>Enregistrer les modifications</span>
+                </button>
             </form>
         </div>
     </div>
@@ -181,7 +136,6 @@ const handleSubmit = async () => {
     border: 1px solid rgba(255, 255, 255, 0.03);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     position: relative;
-    /* Nécessaire si on veut ajuster des éléments */
 }
 
 /* --- STYLE DU BOUTON RETOUR --- */
@@ -203,7 +157,6 @@ const handleSubmit = async () => {
     transition: var(--transition);
 }
 
-/* Animation au survol : le texte s'allume et la flèche glisse vers la gauche */
 .back-link:hover {
     color: var(--accent-color);
 }
@@ -211,8 +164,6 @@ const handleSubmit = async () => {
 .back-link:hover .back-icon {
     transform: translateX(-4px);
 }
-
-/* ------------------------------ */
 
 h2 {
     color: var(--text-main);
@@ -229,15 +180,6 @@ h2 {
     flex-direction: column;
 }
 
-.form-row {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
 label {
     font-size: 0.9rem;
     font-weight: 600;
@@ -247,11 +189,8 @@ label {
 
 /* Style uniforme des inputs */
 input[type="text"],
-input[type="date"],
-input[type="number"],
-input[type="url"],
-select,
-textarea {
+input[type="email"],
+select {
     width: 100%;
     padding: 0.85rem 1rem;
     background-color: rgba(255, 255, 255, 0.03);
@@ -264,27 +203,17 @@ textarea {
 }
 
 input:focus,
-select:focus,
-textarea:focus {
+select:focus {
     outline: none;
     background-color: rgba(255, 255, 255, 0.05);
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
-/* Options du select */
+/* Options du select corrigées */
 select option {
     background-color: var(--card-bg);
     color: var(--text-main);
-}
-
-/* Adaptation spécifique calendrier Chrome/Safari */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) opacity(0.6);
-}
-
-textarea {
-    resize: vertical;
 }
 
 /* Flèche personnalisée pour le select sur fond sombre */
@@ -386,13 +315,15 @@ select {
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
     background-color: var(--accent-hover);
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
     transform: translateY(-2px);
 }
 
-.submit-btn:active {
-    transform: translateY(0);
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 </style>

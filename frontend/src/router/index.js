@@ -13,6 +13,9 @@ import GenreCreateView from "@/views/GenreCreateView.vue";
 import GenreUpdatedView from "@/views/GenreUpdatedView.vue";
 import GenreListView from "@/views/GenreListView.vue";
 import FavoritesView from "@/views/FavoritesView.vue";
+import AdminView from "@/views/AdminView.vue";
+import AddUserView from "@/views/AddUserView.vue";
+import UpdatedUserView from "@/views/UpdatedUserView.vue";
 
 
 
@@ -27,20 +30,26 @@ const routes = [
 
   // Movie
   { path: "/movies", name: "movies", component: MovieListView },
+  { path: "/movies/new", name: "moviesnew", component: MovieCreateView, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: "/movies/updated", name: "moviesupdated", component: MovieUpdatedView , meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: "/movies/deleted", name: "moviesdeleted", component: MovieDeletedView, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: "/movies/:id", name: "moviesdétail", component: MovieDetailView },
-  { path: "/movies/new", name: "moviesnew", component: MovieCreateView },
-  { path: "/movies/updated/:id", name: "moviesupdated", component: MovieUpdatedView },
-  { path: "/movies/delete/:id", name: "moviesdeleted", component: MovieDeletedView },
-  
+
   //Genres
   
   { path: "/genres", name: "genre", component: GenreListView },
-  { path: "/genres/:id", name: "genredétail", component: GenreDetailView },
   { path: "/genres/new", name: "genresnew", component: GenreCreateView },
+  { path: "/genres/:id", name: "genredétail", component: GenreDetailView },
   { path: "/genres/updated/:id", name: "genresupdated", component: GenreUpdatedView },
   
   //Users
   { path: "/users/{id}/favorites", name: "moviesfavoris", component: FavoritesView },
+  { path: "/users/new", name: "usernew", component: AddUserView, meta: { requiresAdmin: true }}, 
+  { path: "/users/updated", name: "usersupdated", component: UpdatedUserView, meta: { requiresAdmin: true }},
+
+  //Admin
+  { path: "/admin", name: "admin", component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
+
 ];
 
 const router = createRouter({
@@ -52,6 +61,10 @@ router.beforeEach((to) => {
   const store = useUserStore();
   if (to.meta.requiresAuth && !store.token) {
     return { name: "login" };
+  }
+
+   if (to.meta.requiresAdmin && !store.user?.roles?.includes("ROLE_ADMIN")) {
+    return { name: "home" };
   }
 });
 

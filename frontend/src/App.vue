@@ -4,6 +4,8 @@ import MovieItem from './components/MovieItem.vue';
 import MovieListView from './views/MovieListView.vue';
 import HomeView from './views/HomeView.vue';
 import NavBar from './components/NavBar.vue';
+import Footer from './components/Footer.vue';
+import Alert from './components/Alert.vue';
 
 
 </script>
@@ -12,10 +14,11 @@ import NavBar from './components/NavBar.vue';
   <div class="layout-container">
     <NavBar/>
   </div>
+  <RouterView/>
+  <Alert/>
+  <Footer/>
+  
 
-  <body>
-    <RouterView/>
-  </body>
 </template>
 
 <style scoped>

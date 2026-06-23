@@ -19,7 +19,7 @@ export function useMovies() {
 
   // Propriété calculée pour filtrer les films/série les mieux noté
   const bestRateMovies = computed(() => {
-    console.log("Données brutes reçues pour le filtre de note :", movies.value);
+    // console.log("Données brutes reçues pour le filtre de note :", movies.value);
     return movies.value.filter((item) => item.rating >= 4);
   });
 
@@ -27,7 +27,7 @@ export function useMovies() {
   const recentMovies = computed(() => {
     return movies.value.filter((item) => {
       const dateMovie= new Date(item.releaseDate);
-      console.log(dateMovie)
+      // console.log(dateMovie)
       const year = dateMovie.getFullYear()
       return year >= 2020; // Garde les films de 2020, 2021, 2022...
     });
@@ -40,7 +40,7 @@ export function useMovies() {
     try {
       const res = await api.get("/movies");
       movies.value = res.data.member;
-      console.log(movies.value);
+      // console.log(movies.value);
     } catch (err) {
       error.value = err?.message || "Erreur lors de la récupération des films.";
     } finally {
@@ -73,11 +73,12 @@ export function useMovies() {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.post("/movie/new", payload);
-      movie.value.unshift(res.data);
+      const res = await api.post("/movies", payload);
+      if (movies.value) movies.value.unshift(res.data);
       return res.data;
     } catch (error) {
-      error.value = error?.message || "Erreur lors de la création de l'article";
+      error.value = error?.message || "Erreur lors de la création du film";
+      throw error;
     } finally {
       loading.value = false;
     }
@@ -88,7 +89,7 @@ export function useMovies() {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.put("/movie/updated/:id", payload);
+      const res = await api.put(`/movies/${id}`, payload);
       // Mettre à jour la lsite locale si présente
       const idx = movies.value.findIndex((movie) => movie.id === res.data.id);
       if (idx !== -1) movies.value[idx] = res.data;
@@ -102,6 +103,20 @@ export function useMovies() {
     }
   };
 
+  const deleteMovie = async (id) => {
+  loading.value = true;
+  error.value = null;
+  try {
+    await api.delete(`/movies/${id}`);
+    movies.value = movies.value.filter((movie) => movie.id !== parseInt(id));
+  } catch (err) {
+    error.value = err?.message || "Erreur lors de la suppression du film.";
+    throw err;
+  } finally {
+    loading.value = false;
+  }
+};
+
   return {
     movies,
     movie,
@@ -111,6 +126,7 @@ export function useMovies() {
     fetchMovie,
     createMovie,
     updateMovie,
+    deleteMovie,
     onlyMovies,
     onlySeries,
     bestRateMovies,

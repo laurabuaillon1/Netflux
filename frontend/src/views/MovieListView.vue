@@ -22,7 +22,7 @@ onMounted(async () => {
 
     const genresResponse = await api.get("/genres");
     genres.value = genresResponse.data.member;
-    console.log(genresResponse.data);
+    
 
 })
 
@@ -52,7 +52,7 @@ const filteredMovies = computed(() => {
 
     return filtered
 })
-console.log(filteredMovies)
+
 
 </script>
 <template>

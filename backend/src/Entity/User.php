@@ -47,6 +47,14 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
             security: "is_granted('ROLE_USER')",
             provider: FavoriteListProvider::class,
         ),
+        new GetCollection(
+            uriTemplate: '/users',
+            security: "is_granted('ROLE_ADMIN')",
+            openapi: new ModelOperation(
+                summary: "Liste des utilisateurs",
+                description: "Api qui permet de lister tous les utilisateurs"
+            ),
+        ),
         new Post(
             uriTemplate: '/users/{id}/favorites',
             name: 'user_favorite_list_update',
@@ -64,7 +72,7 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
             openapi: new ModelOperation(
                 summary: "Ajout d'un utilisateur",
                 description: "Api qui permet d'ajouter un utilisateur"
-                ),
+            ),
             processor: UserProcessor::class,
         ),
         new Patch(
@@ -74,7 +82,8 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 summary: "Modifier certains champs d'un utilisateur",
                 description: "Api qui permet de modifier certains champs d'un utilisateur"
             ),
-            security: "is_granted('ROLE_USER') and object == user or is_granted('ROLE_ADMIN')"
+            security: "is_granted('ROLE_USER') and object == user or is_granted('ROLE_ADMIN')",
+            denormalizationContext: ['groups' => ['user:patch']],
         ),
         new Delete(
             uriTemplate: '/users/{id}',
@@ -85,7 +94,7 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
             ),
             security: "is_granted('ROLE_USER') and object == user or is_granted('ROLE_ADMIN')"
         ),
-        
+
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
@@ -102,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'user:patch'])]
     #[Assert\NotBlank(message: "L\'email' est obligatoire.")]
     #[Assert\Email(
         message: 'l\email: "{{ value }} " n\'est pas valide'
@@ -113,12 +122,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user:read'])]
-    #[Assert\Choice(
-        choices: ['ROLE_USER', 'ROLE_ADMIN'],
-        multiple: true,
-        message: 'Rôle invalide.'
-    )]
+    #[Groups(['user:read','user:write', 'user:patch'])]
+    // #[Assert\Choice(
+    //     choices: ['ROLE_USER', 'ROLE_ADMIN'],
+    //     multiple: true,
+    //     message: 'Rôle invalide.'
+    // )]
     private array $roles = [];
 
     /**
@@ -144,14 +153,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         minMessage: 'Votre pseudo doit être minimum de {{ limit }} characters',
         maxMessage: 'Votre pseudo doit être maximum de {{ limit }} characters',
     )]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'user:patch'])]
     private ?string $pseudo = null;
 
     /**
      * @var Collection<int, Movie>
      */
     #[ORM\ManyToMany(targetEntity: Movie::class, inversedBy: 'users')]
-    #[Groups(['user:read', 'user:write','favorite:write'])]
+    #[Groups(['user:read', 'user:write', 'favorite:write'])]
     private Collection $favoris;
 
     public function __construct()
@@ -210,7 +219,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function setRoles(array $roles): static
     {
-        $this->roles = $roles;
+        $this->roles = array_unique(array_values($roles));
 
         return $this;
     }

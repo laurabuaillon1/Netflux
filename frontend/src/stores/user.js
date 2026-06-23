@@ -4,33 +4,38 @@ import api from "@/api/axios";
 
 export const useUserStore = defineStore("user", () => {
   const token = ref(localStorage.getItem("token") || null);
-  const user = ref(null);
+  const user = ref(JSON.parse(localStorage.getItem("user")) || null);
 
-  const price=ref(7.99);
+  const price = ref(7.99);
 
   async function login(email, password) {
     const { data } = await api.post("/login", { email, password });
     token.value = data.token;
     localStorage.setItem("token", token.value);
-    console.log('Tu es connecté')
+
+    const { data: userData } = await api.get("/users/me");
+    user.value = userData;
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    console.log("Tu es connecté");
   }
 
   function logout() {
     token.value = null;
     user.value = null;
     localStorage.removeItem("token");
-    console.log('Tu es déconnecté')
+    localStorage.removeItem("user");
+    console.log("Tu es déconnecté");
   }
 
   //paramètres = champs du formulaire
-  async function register(email,password,pseudo){
+  async function register(email, password, pseudo) {
     //Post /users ->La route API
-    const {data} =await api.post("/users", {email,password,pseudo});
+    const { data } = await api.post("/users", { email, password, pseudo });
     //appel de login pour connecté automatiquement
-    await login(email,password);
-    console.log('Le compte est crée')
+    await login(email, password);
+    console.log("Le compte est crée");
   }
 
-  return { token, user, login, logout,register,price };
-  
+  return { token, user, login, logout, register, price };
 });
