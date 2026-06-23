@@ -1,0 +1,85 @@
+<?php
+
+namespace App\DataFixtures;
+
+use App\Entity\Genre;
+use App\Entity\Movie;
+use App\Entity\User;
+use App\Enum\MovieType;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Faker\Factory;
+
+class AppFixtures extends Fixture
+{
+    public function __construct(private UserPasswordHasherInterface $passwordHasher)
+    {
+    }
+
+    public function load(ObjectManager $manager): void
+    {
+        $faker=Factory::create();
+
+        // ==========================================
+        // CRÉATION DES GENRES 
+        // ==========================================
+        $genreNames = ['Action', 'Comédie','Drame', 'Science-fiction', 'Horreur','Thriller', 'Animation'];
+        $genresdb=[];
+
+        foreach($genreNames as $name){
+            $genre = new Genre();
+            $genre->setName($name);
+            $manager->persist($genre);
+            $genresdb[]=$genre;
+        }
+
+        // ==========================================
+        // CRÉATION DES UTILISATEURS 
+        // ==========================================
+        for($i=0;$i <5;$i++){
+            $user = new User();
+            $user->setPseudo($faker->userName());
+            $user->setEmail($faker->unique()->email());
+            $user->setPassword($this->passwordHasher->hashPassword($user, 'user123'));
+            $user->setRoles(['ROLE_USER']);
+            $manager->persist($user);
+        }
+
+        // ==========================================
+        // CRÉATION DUN ADMIN
+        // ==========================================
+
+            $admin = new User();
+            $admin->setPseudo('admin');
+            $admin->setEmail('admin@netflux.fr');
+            $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin123'));
+            $admin->setRoles(['ROLE_ADMIN']);
+            $manager->persist($admin);
+        // ==========================================
+        // CRÉATION DES FILMS ET SÉRIES (Une vingtaine)
+        // ==========================================
+        $movieTypes= MovieType::cases();
+
+        for ($i = 0; $i < 20; $i++) {
+            $movie = new Movie();
+            $movie->setTitle($faker->name());
+            $movie->setSynopsis($faker->paragraph());
+            $movie->setReleaseDate($faker->dateTimeBetween('-20 years', 'now'));
+            $movie->setDuration($faker->numberBetween(80, 180));
+            $movie->setRating($faker->randomFloat(1, 1, 5));
+            // $movie->setImageUrl($faker->imageUrl(640, 480, 'cinema'));
+            $movie->setImageUrl('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            $movie->setVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+            $movie->setCreatedAt($faker->dateTime());
+            $movie->setUpdatedAt($faker->dateTime());
+            $manager->persist($movie);
+
+            if(!empty($movieTypes)){
+                $movie->setType($faker->randomElement($movieTypes));
+                $movie->addBelong($faker->randomElement($genresdb));
+            }
+        }
+        $manager->flush();
+    }
+}
