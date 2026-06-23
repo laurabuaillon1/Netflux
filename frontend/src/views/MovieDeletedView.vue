@@ -5,11 +5,11 @@ import { useMovies } from '@/composables/useMovies';
 import { useRouter } from 'vue-router';
 
 const { fetchMovies, deleteMovie, movies, loading, error } = useMovies();
-
 const router = useRouter();
 const selectedMovieId = ref(null);
 
 
+//utilisation du composable
 onMounted(async () => {
     await fetchMovies();
 });

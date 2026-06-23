@@ -44,8 +44,8 @@ const routes = [
   
   //Users
   { path: "/users/{id}/favorites", name: "moviesfavoris", component: FavoritesView },
-  { path: "/users/new", name: "usernew", component: AddUserView },
-  { path: "/users/updated", name: "usersupdated", component: UpdatedUserView},
+  { path: "/users/new", name: "usernew", component: AddUserView, meta: { requiresAdmin: true }}, 
+  { path: "/users/updated", name: "usersupdated", component: UpdatedUserView, meta: { requiresAdmin: true }},
 
   //Admin
   { path: "/admin", name: "admin", component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },

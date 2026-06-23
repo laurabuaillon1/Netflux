@@ -21,9 +21,9 @@ onMounted(async () => {
 })
 
 const handleFavorite = async (isFavorite) => {
-    console.log('isFavorite:', isFavorite);
-    console.log('user:', user.value);
     await toggleFavorite(props.movie.id);
+    // console.log('isFavorite:', isFavorite);
+    // console.log('user:', user.value);
 
 }
 </script>

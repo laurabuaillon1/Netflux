@@ -1,17 +1,24 @@
 <script setup>
+
+// les imports
 import { ref, reactive, onMounted } from 'vue';
 import api from '@/api/axios';
 import { useMovies } from '@/composables/useMovies';
+import router from '@/router';
 
 const { createMovie, loading, error } = useMovies();
 
+
+//le chargement des genres
 const genres = ref([]);
 
 onMounted(async () => {
     const res = await api.get("/genres");
     genres.value = res.data.member;
 })
-// Initialisation des données du formulaire
+
+
+// formulaire réactif :Initialisation des données du formulaire
 const formData = reactive({
     title: '',
     synopsis: '',
@@ -27,6 +34,7 @@ const formData = reactive({
 // Gestion de la soumission
 const handleSubmit = async () => {
     await createMovie(formData);
+    router.push({name:'admin'});
 
 };
 

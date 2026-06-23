@@ -57,7 +57,7 @@
                         </svg>
                     </div>
                     <div class="card-content">
-                        <h3>Supprimer un contenu</h3>
+                        <h3>Supprimer un film/série</h3>
                         <p>Retirer définitivement un film ou une série de la base de données.</p>
                     </div>
                     <div class="card-footer">

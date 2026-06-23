@@ -29,7 +29,7 @@ async function envoyer() {
 
   try {
     await stores.login(email.value, password.value);
-    console.log("Token Récupéré :", stores.token);
+    // console.log("Token Récupéré :", stores.token);
     triggerAlert('Connexion réussie ! Bienvenue sur NetFlux.', 'success');
     success.value = true;
     router.push({ name: 'home' });

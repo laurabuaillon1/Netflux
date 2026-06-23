@@ -83,7 +83,7 @@ use Symfony\Component\Validator\Constraints\PasswordStrength;
                 description: "Api qui permet de modifier certains champs d'un utilisateur"
             ),
             security: "is_granted('ROLE_USER') and object == user or is_granted('ROLE_ADMIN')",
-            denormalizationContext: ['groups' => ['user:write']],
+            denormalizationContext: ['groups' => ['user:patch']],
         ),
         new Delete(
             uriTemplate: '/users/{id}',
@@ -111,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'user:patch'])]
     #[Assert\NotBlank(message: "L\'email' est obligatoire.")]
     #[Assert\Email(
         message: 'l\email: "{{ value }} " n\'est pas valide'
@@ -122,12 +122,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user:read','user:write'])]
-    #[Assert\Choice(
-        choices: ['ROLE_USER', 'ROLE_ADMIN'],
-        multiple: true,
-        message: 'Rôle invalide.'
-    )]
+    #[Groups(['user:read','user:write', 'user:patch'])]
+    // #[Assert\Choice(
+    //     choices: ['ROLE_USER', 'ROLE_ADMIN'],
+    //     multiple: true,
+    //     message: 'Rôle invalide.'
+    // )]
     private array $roles = [];
 
     /**
@@ -153,7 +153,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         minMessage: 'Votre pseudo doit être minimum de {{ limit }} characters',
         maxMessage: 'Votre pseudo doit être maximum de {{ limit }} characters',
     )]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'user:patch'])]
     private ?string $pseudo = null;
 
     /**

@@ -11,7 +11,7 @@ const genres = ref([]);
 const selectedMovieId = ref(null);
 
 
-
+//utilisation du composables
 onMounted(async () => {
     await fetchMovies();
     const res = await api.get("/genres");

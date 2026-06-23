@@ -19,7 +19,7 @@ export function useMovies() {
 
   // Propriété calculée pour filtrer les films/série les mieux noté
   const bestRateMovies = computed(() => {
-    console.log("Données brutes reçues pour le filtre de note :", movies.value);
+    // console.log("Données brutes reçues pour le filtre de note :", movies.value);
     return movies.value.filter((item) => item.rating >= 4);
   });
 
@@ -40,7 +40,7 @@ export function useMovies() {
     try {
       const res = await api.get("/movies");
       movies.value = res.data.member;
-      console.log(movies.value);
+      // console.log(movies.value);
     } catch (err) {
       error.value = err?.message || "Erreur lors de la récupération des films.";
     } finally {
@@ -73,7 +73,7 @@ export function useMovies() {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.post("/movies/new", payload);
+      const res = await api.post("/movies", payload);
       if (movies.value) movies.value.unshift(res.data);
       return res.data;
     } catch (error) {
