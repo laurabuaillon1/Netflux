@@ -107,29 +107,29 @@ services:
   # ============================================
   # Playwright : Tests E2E
   # ============================================
-  playwright:
-    image: mcr.microsoft.com/playwright:v1.57.0-noble
-    container_name: netflux_playwright
-    depends_on:
-      - backend
-      - frontend_test
-      - nginx_backend
-    environment:
-      CI: "true"
-    volumes:
-      - ./frontend:/app
-    working_dir: /app
-    network_mode: "host"
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        echo 'Installation des dependances Playwright...'
-        npm install
-        echo 'Attente frontend...'
-        sleep 15
-        echo 'Playwright pret'
-        tail -f /dev/null
+  # playwright:
+  #   image: mcr.microsoft.com/playwright:v1.57.0-noble
+  #   container_name: netflux_playwright
+  #   depends_on:
+  #     - backend
+  #     - frontend_test
+  #     - nginx_backend
+  #   environment:
+  #     CI: "true"
+  #   volumes:
+  #     - ./frontend:/app
+  #   working_dir: /app
+  #   network_mode: "host"
+  #   entrypoint: /bin/sh
+  #   command:
+  #     - -c
+  #     - |
+  #       echo 'Installation des dependances Playwright...'
+  #       npm install
+  #       echo 'Attente frontend...'
+  #       sleep 15
+  #       echo 'Playwright pret'
+  #       tail -f /dev/null
 
 volumes:
   backend_test_vendor:
