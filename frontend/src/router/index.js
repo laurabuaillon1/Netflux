@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useUserStore } from "@/stores/user";
 import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
-import { useUserStore } from "@/stores/user";
 import MovieListView from "@/views/MovieListView.vue";
 import MovieDetailView from "@/views/MovieDetailView.vue";
 import RegisterView from "@/views/RegisterView.vue";
@@ -49,6 +49,9 @@ const routes = [
 
   //Admin
   { path: "/admin", name: "admin", component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
+
+  //route inconnue->404-> nécéssite catch-all,
+  { path: '/:pathMatch(.*)*', name: 'notFound', redirect: '/' }
 
 ];
 

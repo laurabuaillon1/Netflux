@@ -58,7 +58,7 @@ const filteredMovies = computed(() => {
 <template>
     <div class="app-container">
         <div class="filter-container">
-            <select v-model="selectedGenre" class="custom-select">
+            <select v-model="selectedGenre" class="custom-select" id="genre">
                 <option value="">Tout les genres</option>
                 <option v-for="genre in genres" :key="genre.id" :value="genre.name">
                     {{ genre.name }}

@@ -67,6 +67,11 @@ async function envoyer() {
           <input v-model="password" type="password" id="password" placeholder="••••••••" class="form-input" required>
         </div>
 
+        <!-- Message d'erreur global du formulaire -->
+        <div v-if="erreur" class="error-message" data-testid="login-error">
+          {{ erreur }}
+        </div>
+
         <button type="submit" class="btn-submit">
           Se connecter
         </button>
@@ -244,5 +249,15 @@ async function envoyer() {
 
 .auth-link:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  text-align: center;
 }
 </style>
