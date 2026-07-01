@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 summary: "Liste des genres",
                 description: "Api qui permet d'afficher le liste des genres",
             ),
-            security:"is_granted('ROLE_USER')"
+            
             
         ),
         new Post(
